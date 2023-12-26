@@ -1,6 +1,7 @@
 import pygame
 from support import import_folder
 from settings import *
+from spikes import Spike
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, surface, create_jump_particles):
@@ -162,5 +163,7 @@ class Player(pygame.sprite.Sprite):
         # Check for player respawn
         if self.rect.centery > screen_height:
             self.respawn()
+        # elif self.rect.colliderect():
+        #     self.respawn()
         else:
             return None

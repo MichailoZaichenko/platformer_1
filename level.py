@@ -4,6 +4,7 @@ from settings import *
 from player import Player
 from particles import ParticleEffect
 from coin import Coin
+from spikes import Spike, spike_mask
 
 class Level():
     def __init__(self, level_data, surface):
@@ -15,6 +16,7 @@ class Level():
         self.player = pygame.sprite.GroupSingle()
         self.dust_sprite = pygame.sprite.GroupSingle()
         self.coins =  pygame.sprite.GroupSingle()
+        self.spikes = pygame.sprite.Group()
 
         self.player_on_ground = False
 
@@ -71,6 +73,11 @@ class Level():
                 if col == 'C':
                     self.coins.add(Coin((x, y), tile_size))
 
+                if col == '^':
+                    spike = Spike((col_index * 70, row_index * 70), 70)
+                    spike.mask = spike_mask
+                    self.spikes.add(spike)
+
     # This function helps scroll the whole level when player reaches a threshold
     # This simulates a 'camera'
     def scroll_x(self):
@@ -115,6 +122,17 @@ class Level():
                     player.rect.right = sprite.rect.left
                     player.on_right = True
                     self.current_x = player.rect.right
+        
+        for sprite in self.spikes.sprites():
+            if sprite.rect.colliderect(player.rect):
+                if player.direction.x == -1:
+                    player.rect.left = sprite.rect.right
+                    player.on_left = True
+                    self.current_x = player.rect.left
+                elif player.direction.x == 1:
+                    player.rect.right = sprite.rect.left
+                    player.on_right = True
+                    self.current_x = player.rect.right
 
         if player.on_left and (player.rect.left < self.current_x) or player.direction.x >= 0:
             player.on_left = False
@@ -149,6 +167,17 @@ class Level():
                     player.on_ceiling = True
                 
                 player.direction.y = 0
+        
+        for sprite in self.spikes.sprites():
+            if sprite.rect.colliderect(player.rect):
+                if player.direction.y > 0:
+                    player.rect.bottom = sprite.rect.top
+                    player.on_ground = True
+                elif player.direction.y < 0:
+                    player.rect.top = sprite.rect.bottom
+                    player.on_ceiling = True
+                
+                player.direction.y = 0
                 
         if player.on_ground and player.direction.y < 0 or player.direction.y > 1:
             player.on_ground = False
@@ -168,6 +197,11 @@ class Level():
         # Level coins
         self.coins.update(self.world_shift)
         self.coins.draw(self.display_surface)
+        self.scroll_x()
+
+        # Level spikes
+        self.spikes.update(self.world_shift)
+        self.spikes.draw(self.display_surface)
         self.scroll_x()
 
         # player

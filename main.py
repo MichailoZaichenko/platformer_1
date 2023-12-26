@@ -26,7 +26,7 @@ while True:
     SCORE_FONT = pygame.font.SysFont('comicsans', 40)
     score_text = SCORE_FONT.render(f"Score: {SCORE}", 1, (255, 255, 255))
     screen.blit(score_text, (10, 10))
-
+    
     # Update the display
     # pygame.display.flip()
     level.run()
